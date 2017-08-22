@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd ">
+    <!-- Timer schedule -->
+    <!-- 调度业务对象 -->
+    <bean id="jobBean" class="com.wonders.test.quartz.TestQuartz" />
+    <!-- 调度业务逻辑 -->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="jobBean" />
+        <property name="targetMethod" value="execute" />
+        <!--将并发设置为false-->
+        <property name="concurrent" value="false" />
+    </bean>
+
+    <!-- 总管理类(触发器)  如果将lazy-init='false'那么容器启动就会执行调度程序 -->
+    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail" />
+        <property name="cronExpression">
+            <!--每10分钟执行一次-->
+            <value>0 */10 * * * ?</value>
+            <!-- 每10秒： */10 * * * * ?   每5分钟： 0 */5 * * * ?   每一小时：0 0 */1 * * ?   每天凌晨三点：0 0 3 * * ? -->
+        </property>
+    </bean>
+
+    <!--作业调度器,list下可加入其他的调度器-->
+    <bean id="startQuartz" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <!-- 此处未定义使用默认配置 -->
+        <!--
+            <property name="configLocation" value="classpath:quartz.properties" />
+        -->
+        <property name="triggers">
+            <list>
+                <ref bean="trigger" />
+            </list>
+        </property>
+    </bean>
+</beans>

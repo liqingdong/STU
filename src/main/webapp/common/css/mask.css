@@ -1,0 +1,46 @@
+/* loading */
+.shade-mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000000;
+}
+
+.shade-fixed {
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.mask-background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: .3;
+    -moz-opacity: .3;
+    filter: alpha(opacity=30);
+}
+
+.mask-msg {
+    position: absolute;
+    cursor: wait;
+    left: 50%;
+    top: 50%;
+    width: auto;
+    color: #222;
+    font-family: tahoma, arial, verdana, sans-serif;
+    font-size: 12px;
+}
+
+.mask-loading {
+    padding: 10px 8px 10px 30px;
+    background: #fff url(../images/loading.gif) no-repeat scroll 5px 50%;
+    border: 2px solid #517fad;
+}

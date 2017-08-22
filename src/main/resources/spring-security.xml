@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+    <security:http security="none" pattern="/**/*.js"/>
+    <security:http security="none" pattern="/**/*.css"/>
+    <security:http security="none" pattern="/**/*.gif"/>
+    <security:http security="none" pattern="/**/*.jpg"/>
+    <security:http security="none" pattern="/**/*.png"/>
+    <security:http security="none" pattern="/login.jsp"/>
+    <security:http security="none" pattern="/randomCode.do"/>
+
+    <security:http auto-config="true">
+        <security:intercept-url pattern="/**" access="ROLE_ALL"/>
+        <security:form-login login-page="/login.jsp" default-target-url="/index.shtml"
+                             always-use-default-target="true" authentication-failure-url="/login.jsp"/>
+        <security:logout invalidate-session="true" logout-success-url="/login.jsp"/>
+        <security:remember-me token-validity-seconds="100" key="xxWeb" user-service-ref="myUserDetailsService"/>
+    </security:http>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="authentication-provider"/>
+    </security:authentication-manager>
+    <bean id="passwordEncoder" class="com.wonders.core.utils.Md5PasswordEncoder"/>
+    <bean id="myUserDetailsService" class="com.wonders.web.security.myUserDetailsService"/>
+    <bean id="authentication-provider"
+          class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <property name="userDetailsService" ref="myUserDetailsService"/>
+        <property name="passwordEncoder" ref="passwordEncoder"></property>
+        <property name="messageSource" ref="messageSource"></property>
+    </bean>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <array>
+                <value>messages</value>
+            </array>
+        </property>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+</beans>
