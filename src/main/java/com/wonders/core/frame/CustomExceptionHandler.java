@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,6 +14,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,9 +22,10 @@ import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 
-public class ExceptionHandler implements HandlerExceptionResolver, Ordered {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CustomExceptionHandler extends SimpleMappingExceptionResolver implements HandlerExceptionResolver {
 
-    private static final Logger logger = LogUtil.getLogger(ExceptionHandler.class);
+    private static final Logger logger = LogUtil.getLogger(CustomExceptionHandler.class);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -94,20 +97,21 @@ public class ExceptionHandler implements HandlerExceptionResolver, Ordered {
             writer.write(objectMapper.writeValueAsString(result));
             writer.close();
         } catch (Exception e) {
+            //ignore
         }
     }
 
     /**
      * 将请求转为日志记录格式
      *
-     * @param request
-     * @return
+     * @param request request
+     * @return String
      */
     @SuppressWarnings("unchecked")
     private String getLogByRequest(HttpServletRequest request) {
         if (request == null)
             return "";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Enumeration<String> enumParams = request.getParameterNames();
         sb.append("\n[Param area start]\n");
         while (enumParams.hasMoreElements()) {
@@ -117,16 +121,12 @@ public class ExceptionHandler implements HandlerExceptionResolver, Ordered {
             if (arrayValues == null)
                 continue;
             for (int i = 0; i < arrayValues.length; i++) {
-                sb.append("[param]" + paramName + "="
-                        + (arrayValues[i] == null ? "" : arrayValues[i]) + "\n");
+                sb.append("[param]").append(paramName).append("=")
+                        .append(arrayValues[i] == null ? "" : arrayValues[i] + "\n");
             }
         }
         sb.append("[Param area end]\n");
         return sb.toString();
     }
 
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
-    }
 }

@@ -3,29 +3,41 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd
        http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop.xsd">
-
-    <mvc:default-servlet-handler/>
-    <aop:aspectj-autoproxy proxy-target-class="true"/>
-    <!-- 视图解析器配置 -->
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
-        <property name="suffix" value=".jsp"/>
-    </bean>
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- 处理文件上传 -->
     <bean id="multipartResolver" class="com.wonders.core.progress.PJCommonsMultipartResolver">
         <!-- 最大上传文件大小(这里指总文件大小，并非单个文件) -->
         <property name="maxUploadSize" value="300000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 文件上传零时目录 -->
+        <property name="uploadTempDir">
+            <bean class="org.springframework.core.io.FileSystemResource">
+                <constructor-arg type="java.lang.String" name="path" value="/Users/liqingdong/Temp/stu"/>
+            </bean>
+        </property>
     </bean>
 
-    <!-- 指定可使用返回数据类型 -->
+    <!-- handlerMapping -->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="order" value="1"/>
+        <!-- 此处配置拦截器对所有请求拦截 -->
+        <property name="interceptors">
+            <bean class="com.wonders.test.interceptor.TestInterceptor"/>
+        </property>
+    </bean>
+
+    <!-- handlerAdapter -->
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <!-- 指定可使用返回数据类型 -->
         <property name="messageConverters">
             <list>
                 <bean class="org.springframework.http.converter.StringHttpMessageConverter">
@@ -37,15 +49,72 @@
                         </list>
                     </property>
                 </bean>
-                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" >
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                     <property name="prefixJson" value="false"/>
                     <property name="supportedMediaTypes" value="application/json"/>
-                    <property name="objectMapper" ref="CustomJacksonObjectMapper"/>
+                    <property name="objectMapper" ref="customJacksonObjectMapper"/>
                 </bean>
                 <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
             </list>
         </property>
+
+        <!-- 注册WebBindingInitializer -->
+        <property name="webBindingInitializer">
+            <bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+                <property name="conversionService">
+                    <bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>
+                </property>
+            </bean>
+        </property>
     </bean>
 
-    <bean id="CustomJacksonObjectMapper" class="com.wonders.core.utils.CustomJacksonObjectMapper"/>
+    <!-- 视图解析器配置 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 异常处理 -->
+    <bean id="exceptionResolver" class="com.wonders.core.frame.CustomExceptionHandler">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.Exception">404</prop>
+                <prop key="java.lang.Throwable">404</prop>
+                <prop key="java.lang.RuntimeException">500</prop>
+                <prop key="java.sql.SQLException">500</prop>
+                <prop key="java.io.IOException">500</prop>
+            </props>
+        </property>
+        <property name="statusCodes">
+            <props>
+                <prop key="500">500</prop>
+                <prop key="404">404</prop>
+            </props>
+        </property>
+        <!-- 设置日志输出级别，不定义则默认不输出警告等错误日志信息 -->
+        <property name="warnLogCategory" value="WARN"/>
+        <!-- 默认错误页面，当找不到上面mappings中指定的异常对应视图时，使用本默认配置 -->
+        <property name="defaultErrorView" value="404"/>
+        <!-- 默认HTTP状态码 -->
+        <property name="defaultStatusCode" value="500"/>
+    </bean>
+
+    <!-- 处理静态资源 -->
+    <mvc:default-servlet-handler/>
+
+    <!-- 此处拦截器可自定义拦截路径 -->
+    <!--<mvc:interceptors>-->
+        <!--<mvc:interceptor>-->
+            <!--<mvc:mapping path="/user/userTest.do"/>-->
+            <!--<bean class="com.wonders.test.interceptor.TestInterceptor"/>-->
+        <!--</mvc:interceptor>-->
+    <!--</mvc:interceptors>-->
+
+    <!-- 注解扫描，此处直扫描Controller注解 -->
+    <context:component-scan base-package="com.wonders.web">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
 </beans>

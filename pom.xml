@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wonders</groupId>
-    <artifactId>STU</artifactId>
-    <name>STU</name>
+    <artifactId>stu</artifactId>
+    <name>stu</name>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
     <description>SSM项目骨架搭建测试</description>
@@ -15,7 +15,7 @@
     </properties>
 
     <dependencies>
-        <!-- webApp -->
+        <!-- webapp -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
