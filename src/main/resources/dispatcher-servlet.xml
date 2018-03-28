@@ -30,9 +30,10 @@
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
         <property name="order" value="1"/>
         <!-- 此处配置拦截器对所有请求拦截 -->
-        <property name="interceptors">
-            <bean class="com.wonders.test.interceptor.TestInterceptor"/>
-        </property>
+        <!--<property name="interceptors">-->
+        <!--<bean class="com.wonders.test.interceptor.TestInterceptor11"/>-->
+        <!--</property>-->
+
     </bean>
 
     <!-- handlerAdapter -->
@@ -103,12 +104,28 @@
     <mvc:default-servlet-handler/>
 
     <!-- 此处拦截器可自定义拦截路径 -->
-    <!--<mvc:interceptors>-->
-        <!--<mvc:interceptor>-->
-            <!--<mvc:mapping path="/user/userTest.do"/>-->
-            <!--<bean class="com.wonders.test.interceptor.TestInterceptor"/>-->
-        <!--</mvc:interceptor>-->
-    <!--</mvc:interceptors>-->
+    <!--
+     情况1：
+        1,2拦截器的preHandle方法都返回去true
+        则执行顺序如下：preHandle1->preHandle2->postHandle2->postHandle1->afterCompletion2->afterCompletion1
+
+     情况2：
+        1返回true，2返回false
+        则执行顺序如下:preHandle1->preHandle2->afterCompletion1
+
+     情况3：
+        1返回false，2返回什么都无所谓了，程序不会近拦截器2，执行顺序如下：preHandle1
+    -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/index.shtml"/>
+            <bean class="com.wonders.test.interceptor.TestInterceptor1"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/index.shtml"/>
+            <bean class="com.wonders.test.interceptor.TestInterceptor2"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
     <!-- 注解扫描，此处直扫描Controller注解 -->
     <context:component-scan base-package="com.wonders.web">
